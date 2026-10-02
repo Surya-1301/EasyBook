@@ -5,7 +5,7 @@ import { User } from '../api/types';
 type AuthContextValue = {
   user: User | null;
   loading: boolean;
-  requestOtp: (phone: string) => Promise<{ devCode?: string }>;
+  requestOtp: (phone: string) => Promise<void>;
   loginWithOtp: (phone: string, code: string) => Promise<User>;
   loginStaff: (identifier: string, password: string) => Promise<User>;
   logout: () => void;
@@ -42,8 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const requestOtp = useCallback(async (phone: string) => {
-    const res = await api.auth.requestOtp(phone);
-    return { devCode: res.devCode };
+    await api.auth.requestOtp(phone);
   }, []);
 
   const loginWithOtp = useCallback(async (phone: string, code: string) => {

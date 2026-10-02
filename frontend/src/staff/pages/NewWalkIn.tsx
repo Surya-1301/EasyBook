@@ -11,7 +11,7 @@ import { Select } from '../../components/Select';
 import { LoadingState } from '../../components/LoadingState';
 import { isValidIndianPhone, normalizePhone } from '../../utils/format';
 
-const CLINIC_ID = (import.meta.env.VITE_CLINIC_ID as string | undefined) || 'demo-clinic';
+import { CLINIC_ID } from '../../utils/clinic';
 
 type Done = { token: number; patientName: string; doctorName: string };
 

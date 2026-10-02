@@ -9,7 +9,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { LoadingState } from '../../components/LoadingState';
 import { formatDateTime } from '../../utils/format';
 
-const CLINIC_ID = (import.meta.env.VITE_CLINIC_ID as string | undefined) || 'demo-clinic';
+import { CLINIC_ID } from '../../utils/clinic';
 
 type QueueMy = Awaited<ReturnType<typeof api.queue.my>>;
 

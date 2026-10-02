@@ -12,7 +12,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { LoadingState } from '../../components/LoadingState';
 import { dayLabel, formatDateTime, formatTime, nextDays } from '../../utils/format';
 
-const CLINIC_ID = (import.meta.env.VITE_CLINIC_ID as string | undefined) || 'demo-clinic';
+import { CLINIC_ID } from '../../utils/clinic';
 
 const PAYMENT_LABELS: Record<string, string> = {
   PENDING: 'Payment pending',

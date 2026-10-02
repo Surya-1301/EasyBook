@@ -73,7 +73,7 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
 export const api = {
   auth: {
     requestOtp: (phone: string) =>
-      request<{ ok: boolean; expiresInSeconds: number; devCode?: string }>('/auth/request-otp', {
+      request<{ ok: boolean; expiresInSeconds: number }>('/auth/request-otp', {
         method: 'POST',
         body: { phone },
       }),

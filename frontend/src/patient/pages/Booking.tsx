@@ -13,7 +13,7 @@ import { LoadingState } from '../../components/LoadingState';
 import { EmptyState } from '../../components/EmptyState';
 import { formatDateTime, formatINR, isValidIndianPhone, normalizePhone } from '../../utils/format';
 
-const CLINIC_ID = (import.meta.env.VITE_CLINIC_ID as string | undefined) || 'demo-clinic';
+import { CLINIC_ID } from '../../utils/clinic';
 
 const RELATIONSHIPS = ['Spouse', 'Child', 'Parent', 'Sibling', 'Other'];
 const GENDERS = ['Male', 'Female', 'Other'];

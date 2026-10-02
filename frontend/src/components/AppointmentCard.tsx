@@ -22,11 +22,15 @@ export function AppointmentCard({
         </div>
         <StatusBadge status={appointment.status} />
       </div>
-      <p className="mt-2 text-sm text-slate-700">{formatDateTime(appointment.startAt)}</p>
-      <p className="text-sm text-slate-500">
-        For {appointment.patient.fullName}
-        {appointment.tokenNumber != null && ` • Token #${appointment.tokenNumber}`}
-      </p>
+      <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm text-slate-700">
+        <span className="font-medium">{formatDateTime(appointment.startAt)}</span>
+        {appointment.tokenNumber != null && (
+          <span className="rounded-full bg-brand-100 px-2.5 py-0.5 text-xs font-bold text-brand-700">
+            Token #{appointment.tokenNumber}
+          </span>
+        )}
+      </div>
+      <p className="mt-1 text-sm text-slate-500">For {appointment.patient.fullName}</p>
     </button>
   );
 }

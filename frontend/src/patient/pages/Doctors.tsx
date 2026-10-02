@@ -10,7 +10,7 @@ import { LoadingState } from '../../components/LoadingState';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 
-const CLINIC_ID = (import.meta.env.VITE_CLINIC_ID as string | undefined) || 'demo-clinic';
+import { CLINIC_ID } from '../../utils/clinic';
 
 export function Doctors() {
   const navigate = useNavigate();

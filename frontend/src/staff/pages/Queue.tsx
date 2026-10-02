@@ -26,10 +26,10 @@ function TicketCard({
   busy: boolean;
 }) {
   return (
-    <div className="rounded-2xl border-2 border-brand-200 bg-brand-50 p-5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">{title}</p>
-      <p className="mt-2 text-5xl font-bold text-slate-900">#{ticket.tokenNumber}</p>
-      <p className="mt-2 text-lg font-semibold text-slate-800">{ticket.patient.fullName}</p>
+    <div className="overflow-hidden rounded-2xl bg-[#0f172a] p-5 text-white">
+      <p className="text-xs font-bold uppercase tracking-widest text-slate-400">{title}</p>
+      <p className="mt-2 text-6xl font-extrabold tracking-tight text-brand-300">#{ticket.tokenNumber}</p>
+      <p className="mt-2 text-lg font-semibold text-slate-100">{ticket.patient.fullName}</p>
       <div className="mt-1">
         <StatusBadge status={ticket.status} />
       </div>
@@ -149,8 +149,11 @@ export function Queue() {
 
   return (
     <div className="mx-auto max-w-6xl p-4 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-slate-900">Live queue</h1>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900">Live queue</h1>
+          <p className="mt-0.5 text-sm text-slate-500">Call, start and complete tokens in real time</p>
+        </div>
         <Select
           label=""
           aria-label="Choose doctor"
@@ -190,15 +193,15 @@ export function Queue() {
             {currentlyServing ? (
               <TicketCard title="Currently serving" ticket={currentlyServing} onAction={act} busy={busy} />
             ) : (
-              <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Currently serving</p>
-                <p className="mt-3 text-lg text-slate-500">Nobody is being seen right now.</p>
+              <div className="rounded-2xl bg-[#0f172a] p-5 text-white">
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Currently serving</p>
+                <p className="mt-3 text-lg text-slate-400">Nobody is being seen right now.</p>
               </div>
             )}
             {next ? (
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Next</p>
-                <p className="mt-2 text-4xl font-bold text-slate-900">#{next.tokenNumber}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Next up</p>
+                <p className="mt-2 text-4xl font-extrabold text-brand-600">#{next.tokenNumber}</p>
                 <p className="mt-2 text-lg font-semibold text-slate-800">{next.patient.fullName}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button size="sm" variant="secondary" disabled={busy} onClick={() => act('call', next)}>

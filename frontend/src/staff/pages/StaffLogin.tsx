@@ -52,7 +52,7 @@ export function StaffLogin() {
           label="Email or phone"
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
-          placeholder="reception@demo.clinic"
+          placeholder="you@yourclinic.com"
           autoComplete="username"
           error={formError || undefined}
         />
@@ -67,20 +67,6 @@ export function StaffLogin() {
           Log in
         </Button>
       </form>
-
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <p className="text-sm font-semibold text-slate-700">Demo accounts</p>
-        <dl className="mt-2 space-y-1 text-sm text-slate-600">
-          <div className="flex justify-between gap-2">
-            <dt className="font-medium">Receptionist</dt>
-            <dd className="font-mono text-xs">reception@demo.clinic / reception123</dd>
-          </div>
-          <div className="flex justify-between gap-2">
-            <dt className="font-medium">Clinic admin</dt>
-            <dd className="font-mono text-xs">admin@demo.clinic / admin123</dd>
-          </div>
-        </dl>
-      </div>
     </div>
   );
 }

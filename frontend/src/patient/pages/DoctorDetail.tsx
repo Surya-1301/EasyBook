@@ -10,7 +10,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { Button } from '../../components/Button';
 import { dayLabel, formatINR, formatTime, initials, nextDays } from '../../utils/format';
 
-const CLINIC_ID = (import.meta.env.VITE_CLINIC_ID as string | undefined) || 'demo-clinic';
+import { CLINIC_ID } from '../../utils/clinic';
 
 export function DoctorDetail() {
   const { id } = useParams();

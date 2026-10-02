@@ -2,11 +2,11 @@ import { createHash, randomInt, randomUUID, timingSafeEqual } from "crypto";
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { config, isDev } from "../../config";
 import { db, row, rows } from "../../db";
 import { ah, fail, ok, zodFieldErrors } from "../../lib/http";
 import { nowIso } from "../../lib/time";
 import { signToken, requireAuth } from "../../middleware/auth";
+import { config } from "../../config";
 
 const router = Router();
 
@@ -14,6 +14,15 @@ const OTP_TTL_SECONDS = 300;
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_RATE_LIMIT_WINDOW_MIN = 15;
 const OTP_RATE_LIMIT_MAX = 5;
+
+// Demo patient login (dev only): DEMO_PHONE can verify with DEMO_PASSWORD as
+// the OTP, so the patient app is testable without an SMS provider.
+// Automatically disabled when NODE_ENV=production; set DEMO_LOGIN_ENABLED=false
+// to turn it off explicitly.
+const DEMO_PHONE = (process.env.DEMO_PHONE || "").trim() || "9616398313";
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? "123456";
+const demoLoginEnabled =
+  process.env.DEMO_LOGIN_ENABLED !== "false" && config.nodeEnv !== "production";
 
 function normalizePhone(raw: string): string | null {
   const digits = raw.replace(/\D/g, "");
@@ -53,11 +62,10 @@ router.post(
        VALUES (?, ?, ?, ?, 0, 0, ?)`
     ).run(randomUUID(), phone, hashCode(code), new Date(Date.now() + OTP_TTL_SECONDS * 1000).toISOString(), now);
 
-    console.log(`[auth] OTP for ${phone}: ${code} (dev only — do not log in production)`);
+    console.log(`[auth] OTP requested for ${phone}`);
     return ok(res, 200, {
       ok: true,
       expiresInSeconds: OTP_TTL_SECONDS,
-      ...(isDev ? { devCode: code } : {}),
     });
   })
 );
@@ -72,6 +80,9 @@ router.post(
     const phone = normalizePhone(parsed.data.phone);
     if (!phone) return fail(res, 400, "VALIDATION_ERROR", "Enter a valid 10-digit mobile number.");
 
+    const isDemoBypass = demoLoginEnabled && phone === DEMO_PHONE && parsed.data.code === DEMO_PASSWORD;
+
+    if (!isDemoBypass) {
     const otp = row<{ id: string; code_hash: string; expires_at: string; attempts: number; used: number }>(
       `SELECT id, code_hash, expires_at, attempts, used FROM otp_verifications
        WHERE phone = ? AND used = 0 ORDER BY created_at DESC LIMIT 1`,
@@ -92,6 +103,9 @@ router.post(
       return fail(res, 400, "VALIDATION_ERROR", "Incorrect OTP. Please try again.");
     }
     db.prepare("UPDATE otp_verifications SET used = 1 WHERE id = ?").run(otp.id);
+    } else {
+      console.log(`[auth] demo patient login for ${phone}`);
+    }
 
     let user = row<{ id: string; phone: string | null; name: string | null; role: string }>(
       "SELECT id, phone, name, role FROM users WHERE phone = ?",

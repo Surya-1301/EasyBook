@@ -22,11 +22,14 @@ function isCheckInable(status: string): boolean {
   return status === 'BOOKED' || status === 'CONFIRMED';
 }
 
-function StatCard({ label, value, tone }: { label: string; value: number; tone: string }) {
+function StatCard({ label, value, tone, bar }: { label: string; value: number; tone: string; bar: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className={`mt-1 text-3xl font-bold ${tone}`}>{value}</p>
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div className={`h-1 ${bar}`} />
+      <div className="p-4">
+        <p className="text-sm font-medium text-slate-500">{label}</p>
+        <p className={`mt-1 text-3xl font-extrabold ${tone}`}>{value}</p>
+      </div>
     </div>
   );
 }
@@ -150,6 +153,64 @@ function CancelModal({
   );
 }
 
+function QueuePanel({ appointments }: { appointments: ReceptionAppointment[] }) {
+  const waiting = appointments
+    .filter((a) => a.queueStatus === 'WAITING' || a.queueStatus === 'CALLED')
+    .sort((x, y) => (x.tokenNumber ?? 0) - (y.tokenNumber ?? 0));
+  const serving =
+    appointments.find((a) => a.queueStatus === 'IN_CONSULTATION') ||
+    appointments.find((a) => a.queueStatus === 'CALLED');
+  const queueDoctor = serving?.doctor.name || waiting[0]?.doctor.name;
+
+  return (
+    <section aria-label="Live queue" className="overflow-hidden rounded-2xl bg-[#0f172a] text-white">
+      <div className="flex items-center justify-between px-5 pt-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+          Live queue{queueDoctor ? ` · ${queueDoctor}` : ''}
+        </p>
+        <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-bold text-emerald-400">
+          <span className="block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+          LIVE
+        </span>
+      </div>
+      <div className="px-5 py-4">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Now serving</p>
+        {serving && serving.tokenNumber != null ? (
+          <>
+            <p className="mt-1 text-5xl font-extrabold tracking-tight text-brand-300">
+              #{serving.tokenNumber}
+            </p>
+            <p className="mt-1 text-sm font-medium text-slate-300">{serving.patient.fullName}</p>
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-slate-400">Nobody is being seen right now.</p>
+        )}
+      </div>
+      <div className="border-t border-slate-800 px-5 py-4">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
+          Waiting ({waiting.length})
+        </p>
+        {waiting.length === 0 ? (
+          <p className="mt-2 text-sm text-slate-400">The waiting list is clear.</p>
+        ) : (
+          <ul className="mt-2 max-h-64 space-y-1.5 overflow-y-auto">
+            {waiting.slice(0, 8).map((a) => (
+              <li
+                key={a.id}
+                className="flex items-center justify-between rounded-xl bg-slate-800/70 px-3 py-2"
+              >
+                <span className="text-sm font-bold text-slate-100">#{a.tokenNumber}</span>
+                <span className="truncate px-2 text-sm text-slate-300">{a.patient.fullName}</span>
+                <span className="shrink-0 text-xs text-slate-400">{formatTime(a.startAt)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function TodayDashboard() {
   const toast = useToast();
   const [dateStr, setDateStr] = useState(toISODate(new Date()));
@@ -233,7 +294,8 @@ export function TodayDashboard() {
     <div className="mx-auto max-w-6xl p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Appointments — {dayLabel(dateStr)}</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900">Today</h1>
+          <p className="mt-0.5 text-sm text-slate-500">{dayLabel(dateStr)} · All doctors</p>
           <div className="mt-2 flex items-center gap-2">
             <Button variant="secondary" size="sm" onClick={() => shift(-1)}>
               ← Prev
@@ -256,17 +318,16 @@ export function TodayDashboard() {
             <Button variant="secondary">+ Walk-in</Button>
           </Link>
           <Link to="/staff/appointments/new">
-            <Button>+ Book Appointment</Button>
+            <Button>+ Book visit</Button>
           </Link>
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <StatCard label="Total" value={stats.total} tone="text-slate-900" />
-        <StatCard label="Checked in" value={stats.checkedIn} tone="text-indigo-600" />
-        <StatCard label="Waiting" value={stats.waiting} tone="text-amber-600" />
-        <StatCard label="Completed" value={stats.completed} tone="text-emerald-600" />
-        <StatCard label="No-show" value={stats.noShow} tone="text-orange-600" />
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Appointments" value={stats.total} tone="text-brand-600" bar="bg-brand-500" />
+        <StatCard label="Checked in" value={stats.checkedIn} tone="text-blue-600" bar="bg-blue-500" />
+        <StatCard label="Waiting" value={stats.waiting} tone="text-amber-600" bar="bg-amber-500" />
+        <StatCard label="Completed" value={stats.completed} tone="text-emerald-600" bar="bg-emerald-500" />
       </div>
 
       <div className="mt-6">
@@ -278,62 +339,75 @@ export function TodayDashboard() {
             message="Book an appointment or add a walk-in to get started."
           />
         ) : (
-          grouped.map((g) => (
-            <section key={g.name} className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <header className="border-b border-slate-100 bg-slate-50 px-4 py-3">
-                <h2 className="text-base font-bold text-slate-900">
-                  {g.name} <span className="font-normal text-slate-500">· {g.specialty}</span>
-                </h2>
-              </header>
-              <ul className="divide-y divide-slate-100">
-                {g.list.map((a) => (
-                  <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                    <span className="w-24 shrink-0 text-sm font-semibold text-slate-900">
-                      {formatTime(a.startAt)}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-slate-900">{a.patient.fullName}</p>
-                      <p className="text-xs text-slate-500">
-                        {a.tokenNumber != null ? `Token #${a.tokenNumber} · ` : ''}
-                        {a.service.name}
-                      </p>
-                    </div>
-                    <StatusBadge status={a.queueStatus ?? a.status} />
-                    <div className="flex flex-wrap gap-1.5">
-                      {isCheckInable(a.status) && (
-                        <Button
-                          size="sm"
-                          variant="success"
-                          disabled={acting === a.id}
-                          onClick={() => checkIn(a)}
-                        >
-                          Check in
-                        </Button>
-                      )}
-                      {isActionable(a.status) && (
-                        <>
-                          <Button size="sm" variant="secondary" onClick={() => setReschedAppt(a)}>
-                            Reschedule
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            disabled={acting === a.id}
-                            onClick={() => noShow(a)}
-                          >
-                            No-show
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setCancelAppt(a)}>
-                            Cancel
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))
+          <div className="grid gap-4 lg:grid-cols-5">
+            <div className="lg:col-span-2">
+              <QueuePanel appointments={appointments} />
+            </div>
+            <div className="lg:col-span-3">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-lg font-extrabold text-slate-900">Today's schedule</h2>
+                <span className="text-sm text-slate-500">{appointments.length} appointments</span>
+              </div>
+              {grouped.map((g) => (
+                <section key={g.name} className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  <header className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                    <h3 className="text-sm font-bold text-slate-900">
+                      {g.name} <span className="font-normal text-slate-500">· {g.specialty}</span>
+                    </h3>
+                  </header>
+                  <ul className="divide-y divide-slate-100">
+                    {g.list.map((a) => (
+                      <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                        <span className="w-20 shrink-0 text-sm font-bold text-slate-900">
+                          {formatTime(a.startAt)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-slate-900">
+                            {a.patient.fullName}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {a.tokenNumber != null ? `#${a.tokenNumber} · ` : ''}
+                            {a.service.name}
+                          </p>
+                        </div>
+                        <StatusBadge status={a.queueStatus ?? a.status} />
+                        <div className="flex flex-wrap gap-1.5">
+                          {isCheckInable(a.status) && (
+                            <Button
+                              size="sm"
+                              variant="success"
+                              disabled={acting === a.id}
+                              onClick={() => checkIn(a)}
+                            >
+                              Check in
+                            </Button>
+                          )}
+                          {isActionable(a.status) && (
+                            <>
+                              <Button size="sm" variant="secondary" onClick={() => setReschedAppt(a)}>
+                                Reschedule
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                disabled={acting === a.id}
+                                onClick={() => noShow(a)}
+                              >
+                                No-show
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={() => setCancelAppt(a)}>
+                                Cancel
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 

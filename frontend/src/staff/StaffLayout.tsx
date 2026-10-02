@@ -1,28 +1,51 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { Button } from '../components/Button';
+import { initials } from '../utils/format';
 
-const baseLinks = [
-  { to: '/staff/today', label: 'Dashboard', icon: '📊' },
-  { to: '/staff/queue', label: 'Queue', icon: '🧾' },
-  { to: '/staff/patients', label: 'Patients', icon: '👥' },
-  { to: '/staff/appointments/new', label: 'Book Appointment', icon: '➕' },
-  { to: '/staff/walk-ins/new', label: 'Walk-in', icon: '🚶' },
+const clinicLinks = [
+  { to: '/staff/today', label: 'Today' },
+  { to: '/staff/queue', label: 'Queue' },
+  { to: '/staff/appointments/new', label: 'Book Appointment' },
+  { to: '/staff/walk-ins/new', label: 'Walk-in' },
+  { to: '/staff/patients', label: 'Patients' },
 ];
 
-const adminLinks = [
-  { to: '/staff/doctors', label: 'Doctors', icon: '🩺' },
-  { to: '/staff/services', label: 'Services', icon: '💊' },
-  { to: '/staff/staff', label: 'Staff', icon: '🧑‍⚕️' },
-  { to: '/staff/reports', label: 'Reports', icon: '📈' },
-  { to: '/staff/settings', label: 'Settings', icon: '⚙️' },
+const manageLinks = [
+  { to: '/staff/doctors', label: 'Doctors' },
+  { to: '/staff/services', label: 'Services' },
+  { to: '/staff/staff', label: 'Staff' },
+  { to: '/staff/reports', label: 'Reports' },
+  { to: '/staff/settings', label: 'Settings' },
 ];
+
+function NavItem({ to, label }: { to: string; label: string }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+          isActive ? 'bg-brand-500 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+        }`
+      }
+    >
+      <span className="block h-2 w-2 shrink-0 rounded-full bg-current opacity-60" aria-hidden />
+      {label}
+    </NavLink>
+  );
+}
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <p className="px-3 text-[11px] font-bold uppercase tracking-widest text-slate-500">{children}</p>
+  );
+}
 
 export function StaffLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const isAdmin = user?.role === 'CLINIC_ADMIN';
-  const links = isAdmin ? [...baseLinks, ...adminLinks] : baseLinks;
+  const allLinks = isAdmin ? [...clinicLinks, ...manageLinks] : clinicLinks;
 
   const onLogout = () => {
     logout();
@@ -31,31 +54,48 @@ export function StaffLayout() {
 
   return (
     <div className="flex min-h-dvh bg-slate-100">
-      <aside className="flex w-60 shrink-0 flex-col bg-slate-900 text-white max-lg:hidden">
-        <div className="p-5">
-          <p className="text-lg font-bold">Clinic Desk</p>
-          <p className="mt-0.5 text-xs text-slate-400">
-            {user?.name} • {user?.role.replace('_', ' ')}
-          </p>
+      <aside className="flex w-60 shrink-0 flex-col bg-[#0f172a] text-white max-lg:hidden">
+        <div className="flex items-center gap-2.5 p-5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500" aria-hidden>
+            <span className="block h-4 w-4 rounded-[4px] bg-white" />
+          </span>
+          <div>
+            <p className="text-base font-extrabold leading-tight">EasyBook</p>
+            <p className="text-[11px] text-slate-400">Clinic command center</p>
+          </div>
         </div>
-        <nav className="flex-1 space-y-1 px-3" aria-label="Staff navigation">
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium ${
-                  isActive ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-                }`
-              }
-            >
-              <span aria-hidden>{l.icon}</span>
-              {l.label}
-            </NavLink>
-          ))}
+        <nav className="flex-1 space-y-5 overflow-y-auto px-3" aria-label="Staff navigation">
+          <div className="space-y-1">
+            <SectionLabel>Clinic</SectionLabel>
+            {clinicLinks.map((l) => (
+              <NavItem key={l.to} to={l.to} label={l.label} />
+            ))}
+          </div>
+          {isAdmin && (
+            <div className="space-y-1">
+              <SectionLabel>Manage</SectionLabel>
+              {manageLinks.map((l) => (
+                <NavItem key={l.to} to={l.to} label={l.label} />
+              ))}
+            </div>
+          )}
         </nav>
-        <div className="p-4">
-          <Button variant="ghost" className="w-full text-slate-200 hover:bg-slate-800" onClick={onLogout}>
+        <div className="border-t border-slate-800 p-4">
+          <div className="flex items-center gap-3 rounded-xl bg-slate-800/70 px-3 py-2.5">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold"
+              aria-hidden
+            >
+              {initials(user?.name || 'S')}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold">{user?.name}</p>
+              <p className="truncate text-xs capitalize text-slate-400">
+                {user?.role.replace('_', ' ').toLowerCase()}
+              </p>
+            </div>
+          </div>
+          <Button variant="ghost" className="mt-2 w-full text-slate-300 hover:bg-slate-800" onClick={onLogout}>
             Log out
           </Button>
         </div>
@@ -63,15 +103,20 @@ export function StaffLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* mobile top bar */}
-        <header className="flex items-center justify-between bg-slate-900 px-4 py-3 text-white lg:hidden">
-          <p className="font-bold">Clinic Desk</p>
+        <header className="flex items-center justify-between bg-[#0f172a] px-4 py-3 text-white lg:hidden">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500" aria-hidden>
+              <span className="block h-3 w-3 rounded-[3px] bg-white" />
+            </span>
+            <p className="font-extrabold">EasyBook</p>
+          </div>
           <Button variant="ghost" size="sm" className="text-slate-200" onClick={onLogout}>
             Log out
           </Button>
         </header>
         {/* mobile nav scroll */}
         <nav className="flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 py-2 lg:hidden" aria-label="Staff navigation mobile">
-          {links.map((l) => (
+          {allLinks.map((l) => (
             <NavLink
               key={l.to}
               to={l.to}
