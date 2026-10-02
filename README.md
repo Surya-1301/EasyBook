@@ -1,47 +1,52 @@
-# Clinic Appointment App — V1
+# EasyBook
 
-Local clinic appointment + queue management. One live schedule for online, phone, and walk-in patients.
-Built from `local-clinic-appointment-app-v1-spec.md`. API surface is pinned in `API_CONTRACT.md`.
+Clinic appointment and queue management for patients, reception staff, doctors, and clinic
+administrators. The backend uses SQLite and the frontend is a Vite/React app.
 
 ```
 clinic-app/
 ├── backend/    Express + TypeScript + SQLite REST API (port 4000)
-├── frontend/   Vite + React + TypeScript + Tailwind (port 5173)
-└── API_CONTRACT.md
+└── frontend/   Vite + React + TypeScript + Tailwind (port 5173)
 ```
 
 ## Quick start
 
-**1. Backend**
+**1. Install dependencies**
 ```bash
+npm install
+npm run install:all
+```
+
+**2. Create a clinic and administrator**
+```bash
+cp backend/.env.example backend/.env
+# Set BOOTSTRAP_CLINIC_NAME, BOOTSTRAP_ADMIN_NAME,
+# BOOTSTRAP_ADMIN_EMAIL, and BOOTSTRAP_ADMIN_PASSWORD in backend/.env.
 cd backend
-npm install
-npm run seed    # demo clinic, doctors, services, staff, patients, demo day
-npm run dev     # http://localhost:4000  (or: npm run build && npm start)
+npm run bootstrap
 ```
 
-**2. Frontend** (new terminal)
+Copy `frontend/.env.example` to `frontend/.env` and set `VITE_CLINIC_ID` to the
+clinic id printed by `npm run bootstrap`.
+
+**3. Start both apps**
 ```bash
-cd frontend
-npm install
-npm run dev     # http://localhost:5173
+cd ..
+npm run dev
 ```
-Optional: copy `.env.example` to `.env` to point at a different API (`VITE_API_URL`)
-or clinic (`VITE_CLINIC_ID`, default `demo-clinic`).
 
-## Demo logins
+The frontend runs at `http://localhost:5173`; the API runs at
+`http://localhost:4000`.
 
-| Role | Login | Credentials |
-|---|---|---|
-| Patient | `/login` (phone + OTP) | `9000000001` … `9000000005` — the demo OTP code is shown on screen (dev mode) |
-| Receptionist | `/staff/login` | `reception@demo.clinic` / `reception123` |
-| Clinic admin | `/staff/login` | `admin@demo.clinic` / `admin123` |
-| Doctor | `/staff/login` | `amit@demo.clinic` / `doctor123` (also `neha@demo.clinic` / `doctor123`) |
+## Demo accounts
 
-Seeded: **ABC Family Clinic**, Dr. Amit Sharma (General Physician, ₹500) and
-Dr. Neha Verma (Dermatologist, ₹700), Mon–Sat 09:00–13:00 + 17:00–20:00,
-3 services, 5 demo patients, and a demo day with completed / cancelled /
-no-show / checked-in / waiting / walk-in appointments.
+After bootstrapping a clinic, run `npm run demo-user --prefix backend` to create
+local test accounts. Defaults are:
+
+- Staff/admin: phone `9616398313`, password `123456`
+- Patient: phone `9616398313`, then enter `123456` as the OTP
+
+The demo patient OTP bypass is disabled automatically when `NODE_ENV=production`.
 
 ## What's inside
 
@@ -55,13 +60,13 @@ no-show / checked-in / waiting / walk-in appointments.
 - **Admin**: clinic settings + booking policy, doctor CRUD, weekly schedule editor
   with exceptions (leave / block / custom / extra hours), services, staff, reports
   with CSV export, audit logs.
-- **Backend guarantees**: double-booking blocked by a partial unique DB index
-  (verified with a race test → `409 SLOT_UNAVAILABLE`), 5-minute slot holds with
-  expiry sweeper, sequential queue tokens per doctor/day, audit log on every
-  sensitive action, consistent error shape.
+- **Backend guarantees**: double-booking protection, five-minute slot holds with
+  expiry cleanup, sequential queue tokens, audit logging, and a consistent error shape.
 
 ## Notes
 
-- SQLite file lives at `backend/data/clinic.db` (gitignored). Re-run `npm run seed` anytime for fresh demo data.
+- SQLite file lives at `backend/data/clinic.db` (gitignored). Bootstrap refuses to run
+  when a clinic already exists.
 - Notifications are logged to the backend console (SMS provider plugs into `NotificationService` later).
-- JWT secret: set `JWT_SECRET` in `backend/.env` for anything beyond local demo.
+- Set a strong `JWT_SECRET` in `backend/.env` outside local development.
+- Health endpoints: `GET /health` and `GET /ready`.

@@ -19,7 +19,7 @@ npm run build          # type-check + production build (dist/)
 | Variable         | Default                          | Purpose                              |
 |------------------|----------------------------------|--------------------------------------|
 | `VITE_API_URL`   | `http://localhost:4000/api/v1`   | Backend REST base URL                |
-| `VITE_CLINIC_ID` | `demo-clinic`                    | Clinic id for public doctor/service listings (must match the backend seed) |
+| `VITE_CLINIC_ID` | —                 | Clinic id for public doctor/service listings; required at startup |
 
 The JWT is stored in `localStorage` under `clinic_token`. Every request attaches
 `Authorization: Bearer <token>`; a `401` clears the token and redirects to the
@@ -27,27 +27,25 @@ appropriate login page (`/login` or `/staff/login`).
 
 ## Demo credentials
 
-Patient login is phone + OTP. In dev mode the API returns a `devCode` in the
-`POST /auth/request-otp` response, and the login screen displays it in a
-"Demo code" box — enter it as the OTP. No real SMS is needed.
+Patient login is phone + OTP. For local demo use, the backend accepts the
+configured demo password as the OTP for the configured demo phone; no real SMS
+provider is needed.
 
 Staff / doctor login is at `/staff/login` (email or phone + password):
 
 | Role         | Identifier            | Password      | Lands on        |
 |--------------|-----------------------|---------------|-----------------|
-| Receptionist | `reception@demo.clinic` | `reception123` | `/staff/today` |
-| Clinic admin | `admin@demo.clinic`     | `admin123`     | `/staff/today` |
-| Doctor       | (seeded doctor login)   | (per seed)     | `/doctor/today` |
+| Configured staff account | `DEMO_EMAIL` or `DEMO_PHONE` | `DEMO_PASSWORD` | role-based |
 
-These accounts come from the backend seed data — see the backend README.
+Create these accounts with `npm run demo-user --prefix backend` after running
+`npm run bootstrap`.
 
 ## Login instructions
 
-- **Patient:** open `/login`, enter a 10-digit mobile number (starts 6–9),
-  tap "Send code", then enter the 6-digit code shown in the "Demo code" box.
-- **Staff/doctor:** open `/staff/login`, enter identifier + password from the
-  table above. Receptionists and admins land on the reception dashboard;
-  doctors land on the doctor console.
+- **Patient:** open `/login`, enter the configured demo phone, tap "Send code",
+  then enter the configured demo password as the six-digit OTP.
+- **Staff/doctor:** open `/staff/login`, enter the demo identifier and password.
+  The destination depends on the account role.
 
 ## Routes
 
@@ -69,8 +67,8 @@ Doctor (requires DOCTOR): `/doctor/today`, `/doctor/queue`
 
 ## Notes
 
-- All API calls go through the typed wrapper in `src/api/client.ts`, which
-  matches `../API_CONTRACT.md` exactly. No mocks anywhere.
+- All API calls go through the typed wrapper in `src/api/client.ts`. No mocks
+  are used.
 - Queue screens poll every 20–30s for live updates.
 - Slot booking uses a 5-minute hold (`POST /appointments/hold`) followed by
   `POST /appointments` with an idempotency key; a `409 SLOT_UNAVAILABLE`

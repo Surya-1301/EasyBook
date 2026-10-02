@@ -8,18 +8,20 @@ Base URL: `http://localhost:4000/api/v1`
 ## Setup
 
 ```bash
-cd backend
 npm install
-cp .env.example .env   # PORT=4000, JWT_SECRET=dev-secret-change-me, NODE_ENV=development
-npm run seed           # create SQLite DB + demo data
-npm run dev            # start with hot reload (tsx watch)
+cp .env.example .env
+# Set the BOOTSTRAP_* values in .env, then:
+npm run bootstrap
+npm run dev
 ```
 
 Other scripts:
 
 - `npm run build` — type-check + compile to `dist/`
 - `npm start` — run the compiled server (`node dist/index.js`)
-- `npm run seed` — wipe + reseed demo data (safe to re-run)
+- `npm run bootstrap` — create one clinic and its first clinic administrator;
+  refuses to run if a clinic already exists
+- `npm run demo-user` — create or refresh local staff and patient demo accounts
 
 The SQLite file lives at `backend/data/clinic.db` (gitignored via `data/`).
 
@@ -51,14 +53,15 @@ src/
     reception/             Today's dashboard, bookings, walk-ins, no-show, delay, block-slot
     doctor/                Doctor dashboard, queue start/complete, follow-up
     admin/                 Clinic settings, doctors, schedules, exceptions, services, staff, reports, audit
-  seed.ts                  Demo data
+  bootstrap.ts             First clinic/admin setup
+  demo-user.ts             Local demo account setup
 ```
 
 ## Key behaviours
 
 - **Auth**: patients log in with phone OTP (6-digit, SHA-256 hashed, 5-min expiry,
-  5 attempts, rate-limited per phone). In `NODE_ENV=development`,
-  `POST /auth/request-otp` returns `devCode` in the response for testers.
+  5 attempts, rate-limited per phone). For the configured demo phone in development,
+  the demo password can be entered as the OTP without an SMS provider.
   Staff log in with email/phone + bcrypt password. JWT access tokens (24h, HS256);
   `POST /auth/logout` revokes the token (blacklist).
 - **Double-booking protection**: partial unique index
@@ -86,36 +89,32 @@ src/
   slot blocked, delay set, staff created/updated, clinic updated.
 - **Cancellation/reschedule policy**: enforced against the clinic's
   `cancellationCutoffMinutes` / `rescheduleCutoffMinutes` (defaults 60).
-- All timestamps are UTC ISO 8601; scheduling math uses the clinic timezone
-  (`Asia/Kolkata` in seed data). Errors use `{ error: { code, message, fieldErrors? } }`.
+- All timestamps are UTC ISO 8601; scheduling math uses the configured clinic timezone
+  (`Asia/Kolkata` by default). Errors use `{ error: { code, message, fieldErrors? } }`.
 
 ## Demo credentials
 
-After `npm run seed`:
+After `npm run bootstrap` and `npm run demo-user`:
 
 | Role         | Login                              | Password       |
 | ------------ | ---------------------------------- | -------------- |
-| CLINIC_ADMIN | `admin@demo.clinic`                | `admin123`     |
-| RECEPTIONIST | `reception@demo.clinic`            | `reception123` |
-| DOCTOR       | `amit@demo.clinic` (Amit Sharma)   | `doctor123`    |
-| DOCTOR       | `neha@demo.clinic` (Neha Verma)    | `doctor123`    |
-| PATIENT      | `9000000001` … `9000000005` (OTP)  | use `devCode`  |
+| Configured demo staff role | `DEMO_EMAIL` or `DEMO_PHONE` | `DEMO_PASSWORD` |
+| Configured demo patient | `DEMO_PHONE` | enter `DEMO_PASSWORD` as OTP |
 
-Patient login flow (dev):
+Patient login flow (dev, using the default demo values):
 
 ```bash
 curl -X POST http://localhost:4000/api/v1/auth/request-otp \
-  -H 'Content-Type: application/json' -d '{"phone":"9000000001"}'
-# -> { ok: true, expiresInSeconds: 300, devCode: "123456" }
+  -H 'Content-Type: application/json' -d '{"phone":"9616398313"}'
+# -> { ok: true, expiresInSeconds: 300 }
 
 curl -X POST http://localhost:4000/api/v1/auth/verify-otp \
-  -H 'Content-Type: application/json' -d '{"phone":"9000000001","code":"123456"}'
-# -> { token, user }
+  -H 'Content-Type: application/json' -d '{"phone":"9616398313","code":"123456"}'
+# -> { token, user } when code is the configured demo password
 ```
 
-The seed creates a demo day (today) with completed, cancelled, no-show,
-checked-in + waiting queue tickets, a walk-in, and confirmed upcoming
-appointments — the reception/doctor dashboards are immediately demonstrable.
+Bootstrap creates only the clinic and administrator. Add doctors, services, schedules,
+and staff from the admin console, or use the demo-user script for local login testing.
 
 ## Health checks
 
