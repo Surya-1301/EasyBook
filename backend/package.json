@@ -1,0 +1,36 @@
+{
+  "author": "",
+  "description": "Clinic appointment app backend (Express 4 + TypeScript + better-sqlite3)",
+  "keywords": [],
+  "license": "ISC",
+  "main": "dist/index.js",
+  "name": "clinic-app-backend",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "seed": "tsx src/seed.ts",
+    "start": "node dist/index.js"
+  },
+  "type": "commonjs",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.22.3",
+    "better-sqlite3": "^13.0.3",
+    "jsonwebtoken": "^9.0.3",
+    "bcryptjs": "^3.0.3",
+    "zod": "^3.25.76",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/express": "^4.17.25",
+    "@types/node": "^26.6.4",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/better-sqlite3": "^9.6.0",
+    "tsx": "^4.23.15"
+  }
+}
