@@ -1,4 +1,5 @@
 export type Role = "PATIENT" | "RECEPTIONIST" | "CLINIC_ADMIN" | "DOCTOR";
+export type ServiceType = "clinic" | "barber";
 
 export interface AuthUser {
   id: string;
@@ -8,6 +9,8 @@ export interface AuthUser {
   name: string | null;
   clinicId: string | null;
   doctorId: string | null;
+  serviceType: ServiceType | null;
+  workspaceId: string | null;
 }
 
 declare global {

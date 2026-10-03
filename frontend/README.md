@@ -1,8 +1,8 @@
-# Clinic App — Frontend
+# EasyBook — Frontend
 
 Vite + React 18 + TypeScript (strict) + Tailwind CSS v3 + react-router-dom v6.
 
-Patient app is mobile-first (bottom tab bar); reception is desktop-first (sidebar); doctor console is tablet-friendly.
+Customer workspaces are mobile-first; admin/reception is desktop-first; doctor console is tablet-friendly.
 
 ## Setup
 
@@ -21,9 +21,9 @@ npm run build          # type-check + production build (dist/)
 | `VITE_API_URL`   | `http://localhost:4000/api/v1`   | Backend REST base URL                |
 | `VITE_CLINIC_ID` | —                 | Clinic id for public doctor/service listings; required at startup |
 
-The JWT is stored in `localStorage` under `clinic_token`. Every request attaches
-`Authorization: Bearer <token>`; a `401` clears the token and redirects to the
-appropriate login page (`/login` or `/staff/login`).
+The JWT is stored in `localStorage` under `clinic_token` for compatibility with the
+existing Clinic workspace. Every request attaches `Authorization: Bearer <token>`;
+a `401` clears the token and redirects to `/login` or `/admin`.
 
 ## Demo credentials
 
@@ -31,7 +31,7 @@ Patient login is phone + OTP. For local demo use, the backend accepts the
 configured demo password as the OTP for the configured demo phone; no real SMS
 provider is needed.
 
-Staff / doctor login is at `/staff/login` (email or phone + password):
+Staff / doctor login is at `/admin` (email or phone + password):
 
 | Role         | Identifier            | Password      | Lands on        |
 |--------------|-----------------------|---------------|-----------------|
@@ -44,7 +44,7 @@ Create these accounts with `npm run demo-user --prefix backend` after running
 
 - **Patient:** open `/login`, enter the configured demo phone, tap "Send code",
   then enter the configured demo password as the six-digit OTP.
-- **Staff/doctor:** open `/staff/login`, enter the demo identifier and password.
+- **Staff/doctor:** open `/admin`, enter the demo identifier and password.
   The destination depends on the account role.
 
 ## Routes
@@ -53,13 +53,13 @@ Patient (`/login` public, rest requires PATIENT role):
 `/home`, `/doctors`, `/doctors/:id`, `/booking/:doctorId?date=&slot=&serviceId=`,
 `/appointments`, `/appointments/:id`, `/queue/:appointmentId`, `/profile`
 
-Reception (`/staff/login` public, rest requires RECEPTIONIST or CLINIC_ADMIN):
-`/staff/today`, `/staff/appointments/new`, `/staff/walk-ins/new`,
-`/staff/patients`, `/staff/queue?doctorId=`
+Reception (`/admin` public, rest requires RECEPTIONIST or CLINIC_ADMIN):
+`/admin/today`, `/admin/appointments/new`, `/admin/walk-ins/new`,
+`/admin/patients`, `/admin/queue?doctorId=`
 
 Admin (requires CLINIC_ADMIN, inside the staff shell):
-`/staff/settings`, `/staff/doctors`, `/staff/doctors/:id/schedule`,
-`/staff/services`, `/staff/staff`, `/staff/reports`
+`/admin/settings`, `/admin/doctors`, `/admin/doctors/:id/schedule`,
+`/admin/services`, `/admin/staff`, `/admin/reports`
 
 Doctor (requires DOCTOR): `/doctor/today`, `/doctor/queue`
 

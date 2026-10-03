@@ -13,6 +13,7 @@ export type ErrorCode =
   | "PATIENT_NOT_FOUND"
   | "DOCTOR_NOT_AVAILABLE"
   | "RATE_LIMITED"
+  | "CONFLICT"
   | "INTERNAL_ERROR";
 
 export function fail(

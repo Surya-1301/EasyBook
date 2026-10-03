@@ -108,3 +108,40 @@ export function IconStethoscope(props: SVGProps<SVGSVGElement>) {
     </Svg>
   );
 }
+
+export function IconScissors(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Svg {...props}>
+      <circle cx="6" cy="6" r="3" />
+      <circle cx="6" cy="18" r="3" />
+      <line x1="8.5" y1="7.5" x2="19" y2="19" />
+      <line x1="8.5" y1="16.5" x2="19" y2="5" />
+    </Svg>
+  );
+}
+
+export function IconShoppingBag(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Svg {...props}>
+      <path d="M6 8h12l1 13H5L6 8Z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </Svg>
+  );
+}
+
+export function IconMapPin(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Svg {...props}>
+      <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </Svg>
+  );
+}
+
+export function IconNavigation(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Svg {...props}>
+      <path d="m12 3 7 18-7-4-7 4 7-18Z" />
+    </Svg>
+  );
+}

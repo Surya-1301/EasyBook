@@ -1,7 +1,7 @@
-# Clinic Appointment App — Backend
+# EasyBook API — Backend
 
-Express 4 + TypeScript (strict) + better-sqlite3 REST API for a local clinic
-appointment and queue management app.
+Express 4 + TypeScript (strict) + better-sqlite3 REST API for EasyBook’s local-service
+workspaces. Clinic appointments and queues are the first fully connected workspace.
 
 Base URL: `http://localhost:4000/api/v1`
 
@@ -52,7 +52,8 @@ src/
     queue/                 Staff/doctor queue ops + patient queue view
     reception/             Today's dashboard, bookings, walk-ins, no-show, delay, block-slot
     doctor/                Doctor dashboard, queue start/complete, follow-up
-    admin/                 Clinic settings, doctors, schedules, exceptions, services, staff, reports, audit
+    admin/                 Clinic workspace settings, doctors, schedules, exceptions, services, staff, reports, audit
+    directory/             Nearby local-business discovery
   bootstrap.ts             First clinic/admin setup
   demo-user.ts             Local demo account setup
 ```

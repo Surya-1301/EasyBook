@@ -1,10 +1,10 @@
 # EasyBook
 
-Clinic appointment and queue management for patients, reception staff, doctors, and clinic
-administrators. The backend uses SQLite and the frontend is a Vite/React app.
+EasyBook is a local-services platform for clinics, barber shops, kirana stores, and the
+teams and customers who use them. The backend uses SQLite and the frontend is a Vite/React app.
 
 ```
-clinic-app/
+easybook/
 ├── backend/    Express + TypeScript + SQLite REST API (port 4000)
 └── frontend/   Vite + React + TypeScript + Tailwind (port 5173)
 ```
@@ -27,7 +27,7 @@ npm run bootstrap
 ```
 
 Copy `frontend/.env.example` to `frontend/.env` and set `VITE_CLINIC_ID` to the
-clinic id printed by `npm run bootstrap`.
+clinic id printed by `npm run bootstrap` for the Clinic workspace.
 
 **3. Start both apps**
 ```bash
@@ -57,7 +57,7 @@ The demo patient OTP bypass is disabled automatically when `NODE_ENV=production`
   (phone auto-fill), walk-in with token print, patient search, queue management
   (call / skip / recall / start / complete), doctor delay setter.
 - **Doctor**: today's schedule, live queue, start/complete visit, follow-up marker.
-- **Admin**: clinic settings + booking policy, doctor CRUD, weekly schedule editor
+- **Admin**: service workspace selection plus clinic settings + booking policy, doctor CRUD, weekly schedule editor
   with exceptions (leave / block / custom / extra hours), services, staff, reports
   with CSV export, audit logs.
 - **Backend guarantees**: double-booking protection, five-minute slot holds with

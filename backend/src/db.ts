@@ -63,6 +63,22 @@ CREATE TABLE IF NOT EXISTS clinics (
   updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS local_businesses (
+  id TEXT PRIMARY KEY,
+  type TEXT NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  address TEXT NOT NULL,
+  city TEXT NOT NULL,
+  latitude REAL NOT NULL,
+  longitude REAL NOT NULL,
+  rating REAL,
+  status TEXT NOT NULL DEFAULT 'ACTIVE',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_local_businesses_location ON local_businesses(latitude, longitude, status);
+
 CREATE TABLE IF NOT EXISTS clinic_staff (
   id TEXT PRIMARY KEY,
   clinic_id TEXT NOT NULL,
@@ -306,6 +322,17 @@ CREATE TABLE IF NOT EXISTS revoked_tokens (
 `;
 
 db.exec(SCHEMA);
+
+for (const column of [
+  "ALTER TABLE users ADD COLUMN service_type TEXT",
+  "ALTER TABLE users ADD COLUMN workspace_id TEXT",
+]) {
+  try {
+    db.exec(column);
+  } catch {
+    // Columns already exist on databases created after this migration.
+  }
+}
 
 export function row<T>(sql: string, ...params: unknown[]): T | undefined {
   return db.prepare(sql).get(...params) as T | undefined;

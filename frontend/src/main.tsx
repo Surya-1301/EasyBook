@@ -7,7 +7,7 @@ import { ToastProvider } from './components/Toast';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
-/** Shown instead of a blank page when the app can't boot (e.g. missing env config). */
+/** Shown instead of a blank page when the EasyBook app can't boot. */
 function SetupError({ message }: { message: string }) {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-slate-50 px-6">

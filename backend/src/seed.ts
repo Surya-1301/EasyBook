@@ -36,6 +36,7 @@ function wipe() {
     "audit_logs",
     "otp_verifications",
     "revoked_tokens",
+    "local_businesses",
   ];
   db.exec("PRAGMA foreign_keys = OFF");
   for (const tbl of tables) db.exec(`DELETE FROM ${tbl}`);
@@ -71,6 +72,19 @@ function seed() {
     now,
     now
   );
+
+  const businesses: Array<[string, string, string, string, string, number, number, number]> = [
+    ["clinic", "ABC Family Clinic", "Family medicine and dermatology", "123 Main Road", "Local City", 21.2514, 81.6296, 4.8],
+    ["barber", "The Corner Chair", "Cuts, beard trims and styling", "18 Market Lane", "Local City", 21.2541, 81.6322, 4.7],
+    ["clinic", "CarePoint Dental", "Family and cosmetic dentistry", "42 Lake View Road", "Local City", 21.2573, 81.6248, 4.5],
+  ];
+  const insertBusiness = db.prepare(
+    `INSERT INTO local_businesses (id, type, name, description, address, city, latitude, longitude, rating, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?, ?)`
+  );
+  for (const [type, name, description, address, city, latitude, longitude, rating] of businesses) {
+    insertBusiness.run(randomUUID(), type, name, description, address, city, latitude, longitude, rating, now, now);
+  }
 
   // --- Services -----------------------------------------------------------------
   const services: Record<string, string> = {};

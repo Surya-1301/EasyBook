@@ -12,6 +12,7 @@ import queueRoutes, { patientRouter as patientQueueRoutes } from "./modules/queu
 import receptionRoutes from "./modules/reception/routes";
 import doctorRoutes from "./modules/doctor/routes";
 import adminRoutes from "./modules/admin/routes";
+import directoryRoutes from "./modules/directory/routes";
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use(`${v1}/queue`, patientQueueRoutes); // GET /queue/my (PATIENT)
 app.use(`${v1}/reception`, receptionRoutes);
 app.use(`${v1}/doctor`, doctorRoutes);
 app.use(`${v1}/admin`, adminRoutes);
+app.use(`${v1}/directory`, directoryRoutes);
 
 // 404 for unknown API routes
 app.use(v1, (_req, res) => fail(res, 404, "NOT_FOUND", "Endpoint not found."));
@@ -55,7 +57,7 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 });
 
 const server = app.listen(config.port, () => {
-  console.log(`[clinic-api] listening on http://localhost:${config.port} (env=${config.nodeEnv})`);
+  console.log(`[easybook-api] listening on http://localhost:${config.port} (env=${config.nodeEnv})`);
 });
 
 // Background jobs (server-owned; never depend on a client staying open)

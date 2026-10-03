@@ -26,8 +26,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setUnauthorizedHandler(() => {
       setUser(null);
-      const onStaff = window.location.pathname.startsWith('/staff') || window.location.pathname.startsWith('/doctor');
-      window.location.href = onStaff ? '/staff/login' : '/login';
+      const onStaff = window.location.pathname.startsWith('/staff') || window.location.pathname.startsWith('/doctor') || window.location.pathname.startsWith('/admin');
+      window.location.href = onStaff ? '/admin' : '/login';
     });
     if (getToken()) {
       api.auth

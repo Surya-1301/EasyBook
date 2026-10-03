@@ -1,6 +1,7 @@
-// Types matching ~/workspace/clinic-app/API_CONTRACT.md exactly.
+// Types matching the EasyBook API contract.
 
 export type Role = 'PATIENT' | 'RECEPTIONIST' | 'CLINIC_ADMIN' | 'DOCTOR';
+export type ServiceType = 'clinic' | 'barber';
 
 export type AppointmentStatus =
   | 'HELD'
@@ -45,6 +46,8 @@ export interface User {
   name: string;
   email?: string;
   clinicId?: string;
+  serviceType?: ServiceType | null;
+  workspaceId?: string | null;
 }
 
 export interface Patient {
@@ -63,6 +66,8 @@ export interface Clinic {
   id: string;
   name: string;
   phone?: string;
+  addressLine1?: string;
+  addressLine2?: string;
   address?: string;
   city?: string;
   state?: string;
@@ -70,7 +75,24 @@ export interface Clinic {
   description?: string;
   openingHours?: string;
   logoUrl?: string;
+  latitude?: number;
+  longitude?: number;
   settings?: ClinicSettings;
+}
+
+export type LocalBusinessType = 'clinic' | 'barber';
+
+export interface LocalBusiness {
+  id: string;
+  type: LocalBusinessType;
+  name: string;
+  description?: string;
+  address: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  rating?: number;
+  distanceKm?: number | null;
 }
 
 export interface BookingPolicy {

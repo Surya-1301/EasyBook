@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { config } from "../config";
 import { db, row } from "../db";
 import { fail } from "../lib/http";
-import type { AuthUser, Role } from "../types";
+import type { AuthUser, Role, ServiceType } from "../types";
 
 interface JwtPayload {
   sub: string;
@@ -48,7 +48,9 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     name: string | null;
     role: Role;
     status: string;
-  }>("SELECT id, phone, email, name, role, status FROM users WHERE id = ?", payload.sub);
+    service_type: ServiceType | null;
+    workspace_id: string | null;
+  }>("SELECT id, phone, email, name, role, status, service_type, workspace_id FROM users WHERE id = ?", payload.sub);
   if (!user || user.status !== "ACTIVE") {
     return fail(res, 401, "UNAUTHORIZED", "Account is not active.");
   }
@@ -67,6 +69,8 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     name: user.name,
     clinicId: staff?.clinic_id ?? null,
     doctorId: doctor?.id ?? null,
+    serviceType: user.service_type,
+    workspaceId: user.workspace_id,
   } satisfies AuthUser;
   next();
 }

@@ -72,6 +72,8 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
 
 export const api = {
   auth: {
+    registerAdmin: (body: { name: string; email: string; password: string; serviceType: import('./types').ServiceType; businessName: string }) =>
+      request<{ account: { id: string; email: string; name: string; serviceType: import('./types').ServiceType; workspaceId: string; clinicId: string | null } }>('/auth/register-admin', { method: 'POST', body }),
     requestOtp: (phone: string) =>
       request<{ ok: boolean; expiresInSeconds: number }>('/auth/request-otp', {
         method: 'POST',
@@ -109,6 +111,13 @@ export const api = {
       request<{ doctors: import('./types').DoctorSummary[] }>(`/clinics/${clinicId}/doctors`),
     services: (clinicId: string) =>
       request<{ services: import('./types').Service[] }>(`/clinics/${clinicId}/services`),
+  },
+
+  directory: {
+    nearby: (location: { latitude?: number; longitude?: number; text?: string }, radiusKm = 10) =>
+      request<{ businesses: import('./types').LocalBusiness[]; radiusKm: number }>('/directory/businesses/nearby', {
+        query: { latitude: location.latitude, longitude: location.longitude, location: location.text, radiusKm },
+      }),
   },
 
   doctors: {

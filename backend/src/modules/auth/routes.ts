@@ -141,6 +141,52 @@ router.post(
 );
 
 const staffLoginSchema = z.object({ identifier: z.string().min(3), password: z.string().min(1) });
+const adminRegisterSchema = z.object({
+  name: z.string().min(2).max(120),
+  email: z.string().email(),
+  password: z.string().min(6).max(200),
+  serviceType: z.enum(["clinic", "barber"]),
+  businessName: z.string().min(2).max(200),
+});
+
+router.post(
+  "/register-admin",
+  ah(async (req, res) => {
+    const parsed = adminRegisterSchema.safeParse(req.body);
+    if (!parsed.success) return fail(res, 400, "VALIDATION_ERROR", "Invalid account details.", zodFieldErrors(parsed.error));
+    const { name, email, password, serviceType, businessName } = parsed.data;
+    const existing = row<{ id: string }>("SELECT id FROM users WHERE email = ?", email);
+    if (existing) return fail(res, 409, "CONFLICT", "An account already exists for this email.");
+
+    const now = nowIso();
+    const userId = randomUUID();
+    const workspaceId = `${serviceType}-${randomUUID().slice(0, 8)}`;
+    const passwordHash = await bcrypt.hash(password, 12);
+    let clinicId: string | null = null;
+
+    db.transaction(() => {
+      if (serviceType === "clinic") {
+        clinicId = randomUUID();
+        db.prepare(
+          `INSERT INTO clinics (id, name, phone, address_line_1, city, state, postal_code, timezone, status, created_at, updated_at)
+           VALUES (?, ?, '', '', '', '', '', 'Asia/Kolkata', 'ACTIVE', ?, ?)`
+        ).run(clinicId, businessName, now, now);
+      }
+      db.prepare(
+        `INSERT INTO users (id, phone, email, password_hash, role, name, status, service_type, workspace_id, created_at, updated_at)
+         VALUES (?, NULL, ?, ?, 'CLINIC_ADMIN', ?, 'ACTIVE', ?, ?, ?, ?)`
+      ).run(userId, email, passwordHash, name, serviceType, workspaceId, now, now);
+      if (clinicId) {
+        db.prepare(
+          `INSERT INTO clinic_staff (id, clinic_id, user_id, role, status, created_at, updated_at)
+           VALUES (?, ?, ?, 'CLINIC_ADMIN', 'ACTIVE', ?, ?)`
+        ).run(randomUUID(), clinicId, userId, now, now);
+      }
+    })();
+
+    return ok(res, 201, { account: { id: userId, email, name, serviceType, workspaceId, clinicId } });
+  })
+);
 
 router.post(
   "/staff-login",
@@ -159,7 +205,7 @@ router.post(
       password_hash: string | null;
     }>(
       `SELECT id, phone, email, name, role, status, password_hash FROM users
-       WHERE (email = ? OR phone = ?) AND role IN ('RECEPTIONIST','CLINIC_ADMIN','DOCTOR') LIMIT 1`,
+      WHERE (email = ? OR phone = ?) AND role IN ('RECEPTIONIST','CLINIC_ADMIN','DOCTOR') LIMIT 1`,
       identifier,
       identifier
     );
@@ -171,6 +217,10 @@ router.post(
 
     const staff = row<{ clinic_id: string }>(
       "SELECT clinic_id FROM clinic_staff WHERE user_id = ? AND status = 'ACTIVE' LIMIT 1",
+      user.id
+    );
+    const assignment = row<{ service_type: "clinic" | "barber" | "kirana" | null; workspace_id: string | null }>(
+      "SELECT service_type, workspace_id FROM users WHERE id = ?",
       user.id
     );
     const now = nowIso();
@@ -186,6 +236,8 @@ router.post(
         role: user.role,
         name: user.name,
         clinicId: staff?.clinic_id ?? null,
+        serviceType: assignment?.service_type ?? null,
+        workspaceId: assignment?.workspace_id ?? null,
       },
     });
   })
@@ -221,7 +273,7 @@ router.get(
   ah(async (req, res) => {
     const u = req.user!;
     return ok(res, 200, {
-      user: { id: u.id, phone: u.phone, email: u.email, role: u.role, name: u.name, clinicId: u.clinicId },
+      user: { id: u.id, phone: u.phone, email: u.email, role: u.role, name: u.name, clinicId: u.clinicId, serviceType: u.serviceType, workspaceId: u.workspaceId },
     });
   })
 );

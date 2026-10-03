@@ -11,8 +11,8 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     const loginPath =
-      location.pathname.startsWith('/staff') || location.pathname.startsWith('/doctor')
-        ? '/staff/login'
+      location.pathname.startsWith('/staff') || location.pathname.startsWith('/doctor') || location.pathname.startsWith('/admin')
+        ? '/admin'
         : '/login';
     return <Navigate to={loginPath} replace state={{ from: location.pathname }} />;
   }
@@ -30,7 +30,7 @@ export function RequireRole({
   const { user, loading } = useAuth();
 
   if (loading) return <LoadingState message="Loading…" />;
-  if (!user) return <Navigate to="/staff/login" replace />;
+  if (!user) return <Navigate to={roles.includes('PATIENT') ? '/login' : '/admin'} replace />;
   if (!roles.includes(user.role)) {
     // Send each role to its own home
     const home =
@@ -38,7 +38,7 @@ export function RequireRole({
         ? '/home'
         : user.role === 'DOCTOR'
           ? '/doctor/today'
-          : '/staff/today';
+          : '/admin/today';
     return <Navigate to={home} replace />;
   }
   return <>{children}</>;

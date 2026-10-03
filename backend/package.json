@@ -1,10 +1,10 @@
 {
   "author": "",
-  "description": "Clinic appointment app backend (Express 4 + TypeScript + better-sqlite3)",
+  "description": "EasyBook local-services API (Express 4 + TypeScript + better-sqlite3)",
   "keywords": [],
   "license": "ISC",
   "main": "dist/index.js",
-  "name": "clinic-app-backend",
+  "name": "easybook-backend",
   "private": true,
   "scripts": {
     "build": "tsc",
