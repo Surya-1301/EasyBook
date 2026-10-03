@@ -56,9 +56,7 @@ export function StaffLayout() {
     <div className="flex min-h-dvh bg-slate-100">
       <aside className="flex w-60 shrink-0 flex-col bg-[#0f172a] text-white max-lg:hidden">
         <div className="flex items-center gap-2.5 p-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500" aria-hidden>
-            <span className="block h-4 w-4 rounded-[4px] bg-white" />
-          </span>
+          <img src="/logo-icon.png" alt="EasyBook logo" className="h-9 w-9 rounded-xl" />
           <div>
             <p className="text-base font-extrabold leading-tight">EasyBook</p>
             <p className="text-[11px] text-slate-400">Clinic command center</p>
@@ -105,9 +103,7 @@ export function StaffLayout() {
         {/* mobile top bar */}
         <header className="flex items-center justify-between bg-[#0f172a] px-4 py-3 text-white lg:hidden">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500" aria-hidden>
-              <span className="block h-3 w-3 rounded-[3px] bg-white" />
-            </span>
+            <img src="/logo-icon.png" alt="EasyBook logo" className="h-7 w-7 rounded-lg" />
             <p className="font-extrabold">EasyBook</p>
           </div>
           <Button variant="ghost" size="sm" className="text-slate-200" onClick={onLogout}>

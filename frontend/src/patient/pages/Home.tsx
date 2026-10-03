@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ComponentType, SVGProps } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/client';
 import type { Appointment, Clinic, DoctorSummary } from '../../api/types';
@@ -9,15 +10,18 @@ import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { LoadingState } from '../../components/LoadingState';
 import { DoctorCard } from '../../components/DoctorCard';
+import { IconCalendarPlus, IconClock, IconUsers } from '../../components/icons';
 import { formatDateTime, initials } from '../../utils/format';
 
-const CLINIC_ID = (import.meta.env.VITE_CLINIC_ID as string | undefined) || 'demo-clinic';
+import { CLINIC_ID } from '../../utils/clinic';
 
 function QuickAction({
+  icon: Icon,
   label,
   sub,
   onClick,
 }: {
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
   label: string;
   sub: string;
   onClick: () => void;
@@ -28,8 +32,11 @@ function QuickAction({
       onClick={onClick}
       className="flex flex-col items-center gap-1.5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow focus:outline-none focus:ring-2 focus:ring-brand-500"
     >
-      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-100" aria-hidden>
-        <span className="block h-3 w-3 rounded-full bg-brand-600" />
+      <span
+        className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700"
+        aria-hidden
+      >
+        <Icon className="h-6 w-6" />
       </span>
       <span className="text-sm font-bold text-slate-900">{label}</span>
       <span className="text-[11px] leading-tight text-slate-500">{sub}</span>
@@ -193,9 +200,10 @@ export function Home() {
         {/* Quick actions */}
         <section aria-label="Quick actions" className="mt-6">
           <div className="grid grid-cols-3 gap-3">
-            <QuickAction label="Book visit" sub="Find a doctor" onClick={() => navigate('/doctors')} />
-            <QuickAction label="Family" sub="Members" onClick={() => navigate('/profile')} />
+            <QuickAction icon={IconCalendarPlus} label="Book visit" sub="Find a doctor" onClick={() => navigate('/doctors')} />
+            <QuickAction icon={IconUsers} label="Family" sub="Members" onClick={() => navigate('/profile')} />
             <QuickAction
+              icon={IconClock}
               label="My queue"
               sub="Live status"
               onClick={() =>

@@ -1,9 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import type { ComponentType, SVGProps } from 'react';
+import { IconCalendar, IconHome, IconUser } from '../components/icons';
 
-const tabs = [
-  { to: '/home', label: 'Home' },
-  { to: '/appointments', label: 'Appointments' },
-  { to: '/profile', label: 'Profile' },
+const tabs: { to: string; label: string; icon: ComponentType<SVGProps<SVGSVGElement>> }[] = [
+  { to: '/home', label: 'Home', icon: IconHome },
+  { to: '/appointments', label: 'Appointments', icon: IconCalendar },
+  { to: '/profile', label: 'Profile', icon: IconUser },
 ];
 
 export function PatientLayout() {
@@ -21,33 +23,29 @@ export function PatientLayout() {
             <NavLink
               key={t.to}
               to={t.to}
-              className={({ isActive }) =>
-                `relative flex min-h-[64px] flex-col items-center justify-center gap-1 text-xs font-semibold ${
-                  isActive ? 'text-brand-700' : 'text-slate-400'
-                }`
-              }
+              className="flex min-h-[68px] flex-col items-center justify-center gap-1 pb-2 pt-2.5"
             >
               {({ isActive }) => (
                 <>
                   <span
-                    className={`absolute top-0 h-1 w-10 rounded-b-full transition ${
-                      isActive ? 'bg-brand-500' : 'bg-transparent'
-                    }`}
-                    aria-hidden
-                  />
-                  <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-full transition ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-full transition ${
                       isActive ? 'bg-brand-100' : 'bg-transparent'
                     }`}
                     aria-hidden
                   >
-                    <span
-                      className={`block h-2.5 w-2.5 rounded-full transition ${
-                        isActive ? 'bg-brand-600' : 'bg-slate-300'
+                    <t.icon
+                      className={`h-5 w-5 transition ${
+                        isActive ? 'text-brand-700' : 'text-slate-400'
                       }`}
                     />
                   </span>
-                  {t.label}
+                  <span
+                    className={`text-xs font-semibold transition ${
+                      isActive ? 'text-brand-700' : 'text-slate-400'
+                    }`}
+                  >
+                    {t.label}
+                  </span>
                 </>
               )}
             </NavLink>

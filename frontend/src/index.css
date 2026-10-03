@@ -8,6 +8,89 @@ body {
 
 /* visible focus for keyboard users */
 :focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid #0d9488;
   outline-offset: 2px;
+}
+
+/* ─── Background mesh pattern ─── */
+@layer utilities {
+  .bg-mesh {
+    background-color: #f0fdfa;
+    background-image:
+      radial-gradient(at 20% 20%, rgba(13,148,136,0.08) 0, transparent 50%),
+      radial-gradient(at 80% 10%, rgba(20,184,166,0.06) 0, transparent 50%),
+      radial-gradient(at 50% 90%, rgba(15,118,110,0.05) 0, transparent 50%);
+  }
+}
+
+/* ─── Subtle floating animation ─── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }
+
+/* ─── Shimmer for branding ─── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, #0d9488 0%, #2dd4bf 40%, #0d9488 60%, #0f766e 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s ease infinite;
+}
+
+/* ─── Glass card ─── */
+.glass {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ─── OTP input ─── */
+.otp-input {
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.otp-input:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+  transform: scale(1.05);
+}
+
+/* ─── Input field focus ─── */
+.input-field:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+}
+
+/* ─── Button hover lift ─── */
+.btn-lift {
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-lift:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13,148,136,0.25);
+}
+.btn-lift:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(13,148,136,0.2);
+}
+
+/* ─── Divider ─── */
+.divider-text::before,
+.divider-text::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+.divider-text span {
+  padding: 0 1rem;
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  white-space: nowrap;
 }

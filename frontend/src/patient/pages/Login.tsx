@@ -37,7 +37,6 @@ export function PatientLogin() {
       setCode(['', '', '', '', '', '']);
       setStep('otp');
       toast.success('Code sent. It expires in 5 minutes.');
-      // Focus the first box once the OTP step renders
       setTimeout(() => otpRefs.current[0]?.focus(), 50);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Could not send the code. Please try again.');
@@ -94,117 +93,113 @@ export function PatientLogin() {
   }
 
   return (
-    <div className="min-h-dvh bg-slate-50">
-      {/* Warm gradient header — same language as the patient home greeting */}
-      <div className="rounded-b-[2rem] bg-gradient-to-br from-brand-600 via-brand-500 to-teal-500 px-6 pb-16 pt-10 text-white">
-        <div className="mx-auto w-full max-w-sm">
-          <div className="flex items-center gap-3">
-            <span
-              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-2xl font-bold backdrop-blur"
-              aria-hidden
-            >
-              +
-            </span>
-            <div>
-              <p className="text-lg font-extrabold leading-tight">EasyBook</p>
-              <p className="text-xs font-medium text-teal-50/90">Your clinic, one tap away</p>
-            </div>
-          </div>
+    <div className="min-h-dvh bg-mesh flex flex-col">
+      {/* ─── Top bar ─── */}
+      <header className="px-5 py-4 flex items-center gap-3">
+        <img src="/logo-icon.png" alt="EasyBook logo" className="h-10 w-10 rounded-xl bg-white shadow-md ring-1 ring-teal-100" />
+        <span className="text-xl font-extrabold tracking-tight text-slate-900">EasyBook</span>
+      </header>
 
-          <h1 className="mt-8 text-2xl font-extrabold">
-            {step === 'phone' ? 'Welcome' : 'Check your phone'}
+      {/* ─── Hero section ─── */}
+      <section className="flex-1 flex flex-col items-center justify-center px-6 pt-8 pb-4">
+        <div className="w-full max-w-sm text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+            Welcome back
           </h1>
-          <p className="mt-1 text-sm leading-relaxed text-teal-50/90">
-            {step === 'phone' ? (
-              'Log in with your mobile number to book visits, track your queue and manage appointments.'
-            ) : (
-              <>
-                We sent a 6-digit code to{' '}
-                <span className="font-bold text-white">+91 {normalizePhone(phone)}</span>.{' '}
-                <button
-                  type="button"
-                  onClick={goBackToPhone}
-                  className="font-bold text-white underline decoration-white/50 underline-offset-2 hover:decoration-white"
-                >
-                  Change
-                </button>
-              </>
-            )}
+          <p className="mt-3 text-sm leading-relaxed text-slate-500">
+            Log in with your mobile number to book visits, track your queue, and manage appointments.
           </p>
         </div>
-      </div>
 
-      {/* Overlapping form card */}
-      <div className="mx-auto -mt-10 w-full max-w-sm px-4 pb-10">
-        <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          {/* Step indicator */}
-          <div className="flex items-center gap-1.5" aria-hidden>
-            <span className="h-1.5 flex-1 rounded-full bg-brand-500" />
-            <span
-              className={`h-1.5 flex-1 rounded-full ${step === 'otp' ? 'bg-brand-500' : 'bg-slate-200'}`}
-            />
+        {/* ─── Form card ─── */}
+        <div className="w-full max-w-sm pt-6">
+          <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-white/60 px-7 py-8 shadow-xl shadow-teal-900/5 ring-1 ring-slate-200/60">
+            {/* Step indicator */}
+            <div className="flex items-center gap-1.5" aria-hidden>
+              <span className={`h-1.5 flex-1 rounded-full transition-colors ${step === 'phone' ? 'bg-brand-500' : 'bg-brand-500/30'}`} />
+              <span className={`h-1.5 flex-1 rounded-full transition-colors ${step === 'otp' ? 'bg-brand-500' : 'bg-brand-500/30'}`} />
+            </div>
+
+            {step === 'phone' ? (
+              <div className="mt-7 space-y-5">
+                <PhoneInput
+                  value={phone}
+                  autoFocus
+                  onChange={(digits, valid) => {
+                    setPhone(digits);
+                    setPhoneValid(valid);
+                  }}
+                />
+                <Button className="w-full btn-lift" size="lg" loading={sending} onClick={sendCode}>
+                  Send code
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-7">
+                <p className="text-center text-sm font-semibold text-slate-700">One-time code</p>
+                <p className="mt-1 text-center text-xs text-slate-400">
+                  Sent to +91 {normalizePhone(phone)}
+                </p>
+                <div
+                  className="mt-4 grid grid-cols-6 gap-2"
+                  onPaste={handleOtpPaste}
+                  role="group"
+                  aria-label="6-digit one-time code"
+                >
+                  {code.map((digit, i) => (
+                    <input
+                      key={i}
+                      ref={(el) => { otpRefs.current[i] = el; }}
+                      value={digit}
+                      inputMode="numeric"
+                      autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                      aria-label={`Digit ${i + 1}`}
+                      onChange={(e) => handleOtpChange(i, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                      className="otp-input h-14 w-full rounded-2xl border border-slate-300 bg-white text-center text-xl font-bold text-slate-900 focus:border-brand-500 focus:outline-none"
+                    />
+                  ))}
+                </div>
+                <Button
+                  className="mt-5 w-full btn-lift"
+                  size="lg"
+                  loading={verifying}
+                  disabled={otpValue.length !== 6}
+                  onClick={verify}
+                >
+                  Verify &amp; continue
+                </Button>
+                <button
+                  type="button"
+                  disabled={sending}
+                  onClick={sendCode}
+                  className="mt-3 block w-full text-center text-sm font-semibold text-brand-600 hover:text-brand-700 disabled:opacity-50"
+                >
+                  {sending ? 'Sending…' : 'Resend code'}
+                </button>
+              </div>
+            )}
           </div>
 
-          {step === 'phone' ? (
-            <div className="mt-6 space-y-4">
-              <PhoneInput
-                value={phone}
-                autoFocus
-                onChange={(digits, valid) => {
-                  setPhone(digits);
-                  setPhoneValid(valid);
-                }}
-              />
-              <Button className="w-full" size="lg" loading={sending} onClick={sendCode}>
-                Send code
-              </Button>
-            </div>
-          ) : (
-            <div className="mt-6">
-              <p className="text-center text-sm font-medium text-slate-700">One-time code</p>
-              <div
-                className="mt-3 grid grid-cols-6 gap-2"
-                onPaste={handleOtpPaste}
-                role="group"
-                aria-label="6-digit one-time code"
-              >
-                {code.map((digit, i) => (
-                  <input
-                    key={i}
-                    ref={(el) => {
-                      otpRefs.current[i] = el;
-                    }}
-                    value={digit}
-                    inputMode="numeric"
-                    autoComplete={i === 0 ? 'one-time-code' : 'off'}
-                    aria-label={`Digit ${i + 1}`}
-                    onChange={(e) => handleOtpChange(i, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                    className="h-14 w-full rounded-2xl border border-slate-300 bg-white text-center text-xl font-bold text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-                  />
-                ))}
-              </div>
-              <Button
-                className="mt-5 w-full"
-                size="lg"
-                loading={verifying}
-                disabled={otpValue.length !== 6}
-                onClick={verify}
-              >
-                Verify &amp; continue
-              </Button>
-              <button
-                type="button"
-                disabled={sending}
-                onClick={sendCode}
-                className="mt-3 w-full text-center text-sm font-semibold text-slate-500 hover:text-brand-700 disabled:opacity-50"
-              >
-                {sending ? 'Sending…' : 'Resend code'}
-              </button>
-            </div>
+          {/* Back link */}
+          {step === 'otp' && (
+            <button
+              type="button"
+              onClick={goBackToPhone}
+              className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
+            >
+              ← Back
+            </button>
           )}
         </div>
-      </div>
+      </section>
+
+      {/* ─── Footer ─── */}
+      <footer className="px-6 py-5 text-center">
+        <p className="text-xs text-slate-400">
+          Need help? Contact your clinic.
+        </p>
+      </footer>
     </div>
   );
 }
